@@ -4,7 +4,6 @@ import 'flatpickr/dist/flatpickr.min.css';
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
-// ✅ Реєстрація кастомної англомовної локалі
 const customLocale = {
   ...English,
   firstDayOfWeek: 1,
@@ -17,7 +16,7 @@ const customLocale = {
   },
 };
 
-flatpickr.localize(customLocale); // ← ВАЖЛИВО: глобальна реєстрація
+flatpickr.localize(customLocale);
 
 const input = document.querySelector('#datetime-picker');
 const startBtn = document.querySelector('[data-start]');
@@ -36,7 +35,6 @@ flatpickr(input, {
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
-  locale: 'default', // ← використовує кастомну глобальну локаль
   onChange(selectedDates) {
     const date = selectedDates[0];
     if (date <= new Date()) {
@@ -50,9 +48,18 @@ flatpickr(input, {
       startBtn.disabled = false;
     }
   },
+  
+  onReady(_, __, fp) {
+    const container = fp.calendarContainer.querySelector('.flatpickr-weekdaycontainer');
+    const days = Array.from(container.children);
+    if (days.length === 7 && days[0].innerText === 'Su') {
+      const reordered = [...days.slice(1), days[0]];
+      container.innerHTML = '';
+      reordered.forEach(day => container.appendChild(day));
+    }
+  },
 });
 
-// Псевдо-обгортка для стрілки ▼ місяця
 setTimeout(() => {
   const select = document.querySelector('.flatpickr-monthDropdown-months');
   if (select && !select.parentElement.classList.contains('flatpickr-monthDropdown-months-wrapper')) {
@@ -93,7 +100,6 @@ startBtn.addEventListener('click', () => {
 
 function updateTimerDisplay(ms) {
   const { days, hours, minutes, seconds } = convertMs(ms);
-
   daysEl.textContent = addLeadingZero(days);
   hoursEl.textContent = addLeadingZero(hours);
   minutesEl.textContent = addLeadingZero(minutes);
@@ -117,6 +123,4 @@ function convertMs(ms) {
 
   return { days, hours, minutes, seconds };
 }
-
-
 
